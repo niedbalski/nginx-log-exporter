@@ -20,7 +20,7 @@ The following metrics are currently supported:
 
 ## Building
 
-`go get github.com/swfrench/nginx-log-exporter` will fetch all required
+`go get github.com/niedbalski/nginx-log-exporter` will fetch all required
 dependencies and build the `nginx-log-exporter` binary (which will be placed in
 your `$GOPATH/bin`).
 

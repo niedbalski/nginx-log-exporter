@@ -7,11 +7,12 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 
-	"github.com/swfrench/nginx-log-exporter/file"
-	"github.com/swfrench/nginx-log-exporter/metrics"
+	"github.com/niedbalski/nginx-log-exporter/file"
+	"github.com/niedbalski/nginx-log-exporter/metrics"
 )
 
 const (
@@ -283,13 +284,31 @@ func (c *Consumer) consumeLine(line *parsedLogLine, stats *logStats) {
 		log.Printf("Skipping malformed request field: %v", line.Request)
 	} else if u, err := url.ParseRequestURI(requestFields[1]); err != nil {
 		log.Printf("Skipping malformed request path: %v", requestFields[1])
-	} else if _, ok := c.paths[u.Path]; ok {
-		key := strings.Join([]string{line.Status, requestFields[0], u.Path}, ":")
-		stats.detailedStatusCounts.inc(key, map[string]string{
-			"status_code": line.Status,
-			"path":        u.Path,
-			"method":      requestFields[0],
-		})
+	} else {
+		var pathFound = false
+		if _, ok := c.paths[u.Path]; ok {
+			pathFound = true
+		} else {
+			for path, _ := range c.paths {
+				re, err := regexp.Compile(path)
+				if err != nil {
+					log.Printf("Skipping regex: %s for path: %s", path, u.Path)
+					continue
+				}
+				if re.Match([]byte(u.Path)) {
+					pathFound = true
+				}
+			}
+		}
+
+		if pathFound {
+			key := strings.Join([]string{line.Status, requestFields[0], u.Path}, ":")
+			stats.detailedStatusCounts.inc(key, map[string]string{
+				"status_code": line.Status,
+				"path":        u.Path,
+				"method":      requestFields[0],
+			})
+		}
 	}
 }
 
@@ -330,6 +349,7 @@ func (c *Consumer) consumeBytes(b []byte) error {
 			return err
 		}
 	}
+
 	for code, observations := range stats.latencyObservations.observations {
 		if err := c.httpResponseTimeHist.Observe(map[string]string{
 			"status_code": code,

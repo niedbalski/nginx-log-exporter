@@ -1,0 +1,23 @@
+go:
+    # Whenever the Go version is updated here, .circle/config.yml should also
+    # be updated.
+    version: 1.15
+
+repository:
+  path: github.com/niedbalski/nginx-log-exporter
+
+build:
+  ldflags: |
+    -X github.com/prometheus/common/version.Version={{.Version}}
+    -X github.com/prometheus/common/version.Revision={{.Revision}}
+    -X github.com/prometheus/common/version.Branch={{.Branch}}
+    -X github.com/prometheus/common/version.BuildUser={{user}}@{{host}}
+
+tarball:
+  files:
+    - LICENSE
+
+crossbuild:
+  platforms:
+    - linux/amd64
+    #- linux/arm64

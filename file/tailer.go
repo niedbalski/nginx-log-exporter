@@ -78,7 +78,7 @@ func (t *Tailer) Next() ([]byte, error) {
 	if len(bytes) > 0 {
 		t.lastContent = now
 	} else if now.Sub(t.lastContent) > t.idleDuration {
-		t.openOrRotate()
+		_ = t.openOrRotate()
 	}
 
 	return bytes, nil

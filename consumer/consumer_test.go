@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
-	"github.com/swfrench/nginx-log-exporter/consumer"
-	"github.com/swfrench/nginx-log-exporter/file/mock_tailer"
-	"github.com/swfrench/nginx-log-exporter/metrics/mock_metrics"
+	"github.com/niedbalski/nginx-log-exporter/consumer"
+	"github.com/niedbalski/nginx-log-exporter/file/mock_tailer"
+	"github.com/niedbalski/nginx-log-exporter/metrics/mock_metrics"
 )
 
 var (
@@ -270,7 +270,7 @@ func testWithoutDetailedCountsBase(format, timeExample string, t *testing.T) {
 			Path:        "/foo?bar=1",
 		},
 	} {
-		buildLogLine(format, line, &buffer)
+		_ = buildLogLine(format, line, &buffer)
 	}
 
 	gomock.InOrder(

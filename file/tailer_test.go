@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/swfrench/nginx-log-exporter/file"
+	"github.com/niedbalski/nginx-log-exporter/file"
 )
 
 type RotatingTempFile struct {
