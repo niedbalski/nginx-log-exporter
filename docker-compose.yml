@@ -1,12 +1,19 @@
 version: '3.3'
 
 services:
+  docker-hub-exporter:
+    container_name: docker-hub-exporter
+    image: infinityworks/docker-hub-exporter:latest
+    command:
+      - -organisations=fluent
+    networks:
+      - nginx-log-exporter
+    ports:
+      - 9170:9170
 
   nginx-log-exporter:
     container_name: nginx-log-exporter
-    image: nginx-log-exporter/nginx-log-exporter:latest
-    build:
-      context: .
+    image: quay.io/nginx-log-exporter/nginx-log-exporter-linux-amd64:main
     volumes:
       - ./example-access.log:/access.log
     command: /nginx-log-exporter -export_address 0.0.0.0:9180 -access_log_path /access.log -access_log_format CLF -log_polling_period 10s  -monitored_paths '.*.deb','*.rpm' -custom_labels releases=fluent-bit
@@ -14,28 +21,13 @@ services:
       - nginx-log-exporter
     ports:
       - 9180:9180
-  grafana:
-    image: grafana/grafana:latest
-    depends_on:
-      - prometheus
-    ports:
-      - 3000:3000
-    volumes:
-      - grafana-data:/var/lib/grafana
-      #- ./config/grafana/dashboards:/var/lib/grafana/dashboards
-      - ./_config/grafana/provisioning:/etc/grafana/provisioning
-    networks:
-      - nginx-log-exporter
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-
   prometheus:
     container_name: prometheus
     image: prom/prometheus:latest
     user: root
     volumes:
       - prometheus-data:/data
-      - ./_config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/data

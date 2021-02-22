@@ -297,6 +297,7 @@ func (c *Consumer) consumeLine(line *parsedLogLine, stats *logStats) {
 				}
 				if re.Match([]byte(u.Path)) {
 					pathFound = true
+					break
 				}
 			}
 		}
